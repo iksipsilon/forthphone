@@ -55,9 +55,31 @@ code:
 
 		
 		RCC_PB2PCENR	+ 0x18		# in the original code misspelled 'RCC_APB2PCENR'	
+
 		
-set bit 12  SPIEN
+# To set multiple bits in a register using GNU assembler, you use the OR instruction
+# combined with a bitmask where the target bits are set to 1. This operation preserves 
+# all other bits in the register while forcing the specified bits to 1.
+
+# to set a mask in register t0 set the bits 2, 4, 5, 12 and 14 
+# than OR it with the desired register
+ 
+# li t0, 0b00000000000000000101000000110100 
+# lw t1, (0x18)RCC_PB2PCENR
+# or t2, t1, t0
+# sw t2, 0x18(RCC_PB2PCENR)
+
+# or much easier 
+
+# li t0, 0x40021000
+# lw t1, 0x18(t0)
+# li t2, (1 << 14) | (1 << 12) | (1 << 5) | (1 << 4) | (1 << 2)	
+		# how do we know that t2 is all zeroes? because of the | (OR)? 
+# or t1, t1, t2 
+# sw t1, 0x18(t0)
+
 set bit 14  USART1EN
+set bit 12  SPIEN
 set bit 5	IOPDEN (GPIO D)
 set bit 4   IOPCEN
 set bit 2	IOPAEN
@@ -87,13 +109,13 @@ PD1
 PD7		NRST
 
 
-UART
+USART1    		# Chapter 14 pg. 191
 
 PD5		TX
 PD6		RX
 
 
-SPI
+SPI				# Chapter 16 pg. 219
 
 PC6		MOSI
 PC7		MISO
