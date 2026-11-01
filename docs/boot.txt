@@ -27,29 +27,40 @@ check which peripherals registers need to be adjusted for minimal functionality:
 	what I see from the working version:
 
 
-	FLASH 			0x4002 2000
+	FLASH 				0x4002 2000
 	
-		FLASH_ACTLR 0x4002 2000		# Control Register
-									# set the LSB to 1 for LATENCY pg.251
+		FLASH_ACTLR   	+ 0x00		# Control Register
+
 code:
 
-		li t0, 0x40022000
-		li t1, 1
-		sw t1, 0x00(t0)
+		li t0, 0x40022000			# pg.251
+		li t1, 1					# set the 0th bit   
+		sw t1, 0x00(t0)				# LATENCY: wait (Recommended 15<SYSCLK<=24MHz);
 
 
-	RCC				0x4002 1000
+	RCC					0x4002 1000
 	
-		RCC_CFGR0	0x4002 1004 	# Clock Configuration Register 
+		RCC_CFGR0		+ 0x04  	# Clock Configuration Register 
+		
+		# check pg. 34, 35
+		# [26:24]	MCO[2:0]	0xx: No clock output;  MCO is on PC4 (BLUE-LED) 
+		# [26:24]	MCO[2:0]    101: RC oscillator clock (HSI) output of internal 24MHz;
+		# [26:24]	MCO[2:0]	111: PLL clock output. 
+		# [7:4]		HPRE[3:0]	0000: Prescaler off
 
 code:
 
 		li t0, 0x40021000 
-		sw zero, 0x04(t0)			# pg. 34, 35
-
+		sw zero, 0x04(t0)			# HSI (21MHz internal clock)
 
 		
-
+		RCC_PB2PCENR	+ 0x18		# in the original code misspelled 'RCC_APB2PCENR'	
+		
+set bit 12  SPIEN
+set bit 14  USART1EN
+set bit 5	IOPDEN (GPIO D)
+set bit 4   IOPCEN
+set bit 2	IOPAEN
 
 
 
@@ -62,4 +73,44 @@ code:
 
 
 
+	PINOUTS AND ALTERNATIVES
+
+
+BLUE-LED
+
+PC4
+
+
+DEBUG
+
+PD1
+PD7		NRST
+
+
+UART
+
+PD5		TX
+PD6		RX
+
+
+SPI
+
+PC6		MOSI
+PC7		MISO
+PC5		SCK
+PC1		NSS
+
+
+GPIO
+
+PA1
+PA2
+PD0
+PC0
+PC2
+PC3
+PD2
+PD3
+
+PD4		# shift register for LED matrix
 
