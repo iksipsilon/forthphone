@@ -1,0 +1,37 @@
+	MAKE AND RECEIVE A CALL
+
+1.) Check the headphone with speakers with modem attached to a computer if the mic works.
+1a.)The butons can be hardware debounced if the debouncing code in risc-v is too long.
+
+2.) We need to write a code in risc-v that boots up the machine and polls (or interrupts)
+	the GPIO for buttons and USART2 for the 4G modem.
+
+3.)	We need to send out a predefined number in the AT command to make a call
+
+4.)	We need to make the phone ring/or display a number or both and assign two GPIOs
+	to receive and end a call
+
+5.)	Add the funcionality to dial a number from the phone.
+
+
+
+
+
+We have 8 input buttons hardware debounced with capacitors.
+Five of which are for inputting soroban style numbers.
+	# Two buttons on each side are manipulated with the thumbs
+	# and the the two on each side with i and m.
+	# right outer button pressed with the thumb is for the upper pebble and
+	# the left and right i and m for the lower four pebbles in the soroban
+	# zero is pressed with the right hand m.
+
+	# The right inner button is for enter/receive call
+	# The left inner button is for esc/end call
+	# The left outer button is to toggle between vocabularies (like in FORTH) and menues
+	# Maybe I will swap the thumb button functions (outer buttons for esc/enter) 
+	# So basically it is a 8 bit input device that is ntered uppon releasing
+	# all the buttons so I have 256 commands times the number of vocabularies.
+
+The numbers are presented on the led matrix wheather incoming or outgoing call.
+The numbers can be later be aliased to a name.
+

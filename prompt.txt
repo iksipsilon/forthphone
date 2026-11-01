@@ -1,0 +1,4 @@
+Are we polling or using interrupts for UART and GPIO?
+We are going to use hardware button debouncing using capacitors.
+You wrote a sandbox for my MCU it is in the tools directory.
+On the way of rewritting the code consult me so I can make a decision which way to go.
