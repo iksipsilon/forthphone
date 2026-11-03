@@ -1,0 +1,7 @@
+MCU				- CH32V006F8U6
+microprocessor	- QingKe V2			
+architecture	- -march=rv32ec_zicsr_zmmul
+max frequency	- 48MHz
+RC oscillator	- 24MHz
+SRAM			- 8KB
+FLASH			- 62KB 

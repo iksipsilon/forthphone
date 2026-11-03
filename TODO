@@ -35,3 +35,7 @@ Five of which are for inputting soroban style numbers.
 The numbers are presented on the led matrix wheather incoming or outgoing call.
 The numbers can be later be aliased to a name.
 
+
+The storage for the code is not going to be in the blocks it should fit on the FLASH. 
+But the "filesystem" for data (SD card ove SPI) should be organised so that the root
+is a person`s name and in that block are defined allocatins (lines) for phone number SMS and call logs. Missed calls should also be a sort of block

@@ -1,0 +1,64 @@
+could I use SD cards via SPI for mass storage on my CH32V006F8U6 MCU?
+
+
+
+Weighing DMA and polling for the 512-byte transfers
+Yes, SD cards have a built-in SPI mode, and the SPI peripheral in your manual covers everything it needs. The breakout in your photos (3v3, CS, MOSI, CLK, MISO, GND) is the right kind of module.
+
+Why it fits
+
+Mode and format: SD in SPI mode uses mode 0 (CPOL=0, CPHA=0), MSB first, 8-bit frames. That’s DFF=0, LSBFIRST=0, CPOL=0, CPHA=0. Mode 0 is the one case where the manual’s table and figures agree, so it’s safe to use.
+Chip select: Use software NSS (SSM=1, SSI=1) and drive CS with a normal GPIO. The manual says NSS must be high before you set MSTR/SPE, and if SSI gets cleared you’ll trigger a mode fault (MODF). A GPIO CS also lets you hold CS low across a whole command plus data block, which the card requires.
+Clock speed: The card must be initialised at 100-400 kHz, then you can speed up (25 MHz max in default-speed mode). With BR[2:0], SCK = F_HCLK / 2^(BR+1), so:
+At 48 MHz HCLK, BR=110 (/128) gives 375 kHz for init, and BR=000 (/2) gives 24 MHz afterwards.
+At 24 MHz HCLK, BR=101 (/64) gives 375 kHz.
+Resources: The only RAM you need is a 512-byte sector buffer, which is easy on 8 KB. DMA with TXDMAEN/RXDMAEN is there if you want it, since a read means clocking out 0xFF while receiving.
+Protocol outline
+
+With CS high and MOSI high, send at least 74 clocks.
+Send CMD0 (CRC byte 0x95) to enter SPI mode, then CMD8 (CRC 0x87) to check the voltage range and card version.
+Loop ACMD41 (CMD55 then CMD41, with the HCS bit set) until the card reports it is no longer idle.
+Send CMD58 to read the OCR. The CCS bit tells you whether the card uses block addressing (SDHC) or byte addressing (SDSC).
+Read with CMD17: wait for the 0xFE token, then read 512 data bytes and 2 CRC bytes.
+Write with CMD24: send 0xFE, the 512 bytes and 2 dummy CRC bytes, check the data-response token, then poll until the card stops holding MISO low (busy).
+CRC is off in SPI mode after init, apart from CMD0 and CMD8.
+Details to watch
+
+Full-duplex: Every byte sent also receives one, so poll TXE, write DATAR, wait for RXNE, then read DATAR to clear it. If you skip a read you’ll get OVR.
+Manual errata: The DFF description says “16-bit” for both values. It means 0 = 8-bit, 1 = 16-bit. Also, the CPOL note about slave transmit and the mode table for modes 1 and 2 look garbled in this translation, so don’t rely on them.
+Voltage: The module is a passive breakout with no regulator or level shifter. The 103 parts and the “↑10K” silkscreen suggest 10k pull-ups on the signal lines, which is good. Run it at 3.3 V only, and put a bulk capacitor (10-47 µF) near the card, because writes cause current spikes that can brown out a weak rail.
+Pins: I haven’t verified which SPI1 pins are available on the F8U6’s package, so check the datasheet pin table and remap options.
+Cards: Stick to SDHC cards of 32 GB or less, formatted FAT32, because SDXC/exFAT needs extra code.
+Filesystem
+For FAT access, ChaN’s FatFs (or the smaller Petit FatFs) only needs you to supply disk_read/disk_write functions built on the CMD17/CMD24 routines above. If you don’t need to share the card with a PC, you can skip FAT and address raw 512-byte sectors directly, which is much smaller and simpler.
+
+Note that “mass storage” in the USB sense, where the card shows up as a drive on a PC, is a separate matter. As far as I know, the CH32V00x family has no USB peripheral, so this would be local storage for the MCU only.
+
+
+
+
+	HARDWARE NEEDED: RESISTORS, CAPACITORS
+
+can I connect the the SD card directly to the pins or do I need some capacitors and resistors as on the attached picture of the module?
+
+Listing the passive parts needed around the card
+You can connect the card directly. The SD card only needs 3.3 V and the four SPI signals, and the CH32V006 pins can drive it with no level shifting. The passives on the module aren’t strictly required for it to work, but a few of them are worth copying.
+
+Worth including
+
+Pull-up on CS (10k-100k to 3.3 V): This is the most important one. During reset and boot your GPIO is floating, and without a pull-up the card can see random bytes and wake up in a confused state.
+Pull-ups on MOSI and MISO (10k-100k): Cards leave MISO high-impedance when CS is high, so a pull-up keeps it from floating. The spec recommends them, though many setups work without. From the 103 parts (10k) on your module, it likely has three of these, probably on CS, MOSI and MISO. I can’t tell from the photo which lines they’re on. SCK doesn’t need one.
+100 nF ceramic capacitor at the card’s VDD pin: Place it as close to the socket as you can.
+Bulk capacitor (10-47 µF) on the card supply: This matters most during writes, when current spikes can briefly pull the rail down and cause flaky behaviour or corrupted data. The larger component on your module is probably serving this role.
+If you’re short on parts while prototyping, you can enable the MCU’s internal pull-ups on those pins instead. Check the datasheet for the exact values, as internal pull-ups are usually weaker and less well-defined than external ones.
+
+Optional
+
+22-33 Ω series resistor on SCK: This tames ringing if you run at high clock speeds (24 MHz) with longer wires. At the 375 kHz init speed it makes no difference.
+Card-detect switch: Most sockets have one, but you can ignore it and just detect failures in software.
+What can go wrong
+
+Supply voltage: The card must be powered from 3.3 V, and the SPI lines must be 3.3 V as well. If you power the MCU at 5 V, you’d need level shifting on the signals to the card, because the module doesn’t have it.
+Socket: You still need a micro SD socket or a breakout like yours. The socket’s pin order matters, so follow the SD pinout (CS on DAT3, MOSI on CMD, SCK on CLK, MISO on DAT0), and leave DAT1 and DAT2 unconnected or pulled up with 10k-50k.
+Wiring: Keep traces and wires short, especially if you want to go above a few MHz.
+For a breadboard test, using the module you already have is the simplest route, since it has all of this on it. For your own PCB, the minimum is the socket, a 100 nF cap, a 10 µF cap, and 10k pull-ups on CS, MOSI and MISO.

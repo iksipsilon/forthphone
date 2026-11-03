@@ -74,7 +74,7 @@ code:
 # li t0, 0x40021000
 # lw t1, 0x18(t0)
 # li t2, (1 << 14) | (1 << 12) | (1 << 5) | (1 << 4) | (1 << 2)	
-		# how do we know that t2 is all zeroes? because of the | (OR)? 
+		# the (1 << [0-31]) clears all the bits and sets the ones chosen 
 # or t1, t1, t2 
 # sw t1, 0x18(t0)
 
@@ -98,12 +98,14 @@ set bit 2	IOPAEN
 	PINOUTS AND ALTERNATIVES
 
 
-BLUE-LED
+MCO (clock out)
 
-PC4
+PC4			# blue LED
 
 
-DEBUG
+DEBUG 		# CH32V002_004_005_006_007 support both 1-wire (SWDIO)
+ 			# and 2-wire (SWDIO-SWCLK) debug interfaces. WCH-LinkUserManual pg. 6
+			# so maybe PD1 and PD7 are free.
 
 PD1
 PD7		NRST
@@ -123,7 +125,7 @@ PC5		SCK
 PC1		NSS
 
 
-GPIO
+GPIO		# the pushbuttons could be dialed in with parallel to serial shift register
 
 PA1
 PA2
@@ -134,5 +136,5 @@ PC3
 PD2
 PD3
 
-PD4		# shift register for LED matrix
+PD4		# shift register for LED matrix (needs 4 pins?)
 
