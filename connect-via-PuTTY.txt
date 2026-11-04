@@ -1,0 +1,25 @@
+Find the AT port
+
+Open Device Manager → Ports (COM & LPT). You should see several SIMCom entries
+
+Use AT PORT. In my cas it was:
+SimTech HS-USB AT Port 9011 (COM10)
+
+
+Use PuTTY or Tera Term:
+
+Connection type: Serial
+Port: the AT PORT’s COM number
+Speed: 115200, 8 data bits, no parity, 1 stop bit
+Flow control: none
+
+Open the port and type AT. You should get OK. 
+If you don’t see what you type, turn on local echo, or send ATE1.
+
+# Check the SIM state first:
+AT+CPIN?
+
+# If it replies +CPIN: SIM PIN, enter your PIN like this:
+AT+CPIN="1234"
+
+
