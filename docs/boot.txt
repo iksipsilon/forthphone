@@ -105,10 +105,9 @@ PC4			# blue LED
 
 DEBUG 		# CH32V002_004_005_006_007 support both 1-wire (SWDIO)
  			# and 2-wire (SWDIO-SWCLK) debug interfaces. WCH-LinkUserManual pg. 6
-			# so maybe PD1 and PD7 are free.
 
-PD1
-PD7		NRST
+PD1		SWDIO	# debug
+PD7		NRST	# not needed because we hawe PD1 for 1 wire debug.
 
 
 USART1    		# Chapter 14 pg. 191
@@ -137,4 +136,4 @@ PD2
 PD3
 
 PD4		# shift register for LED matrix (needs 4 pins?)
-
+PD7
