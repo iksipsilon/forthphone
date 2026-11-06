@@ -29,3 +29,20 @@ ATA					# answer a call
 AT+CHUP				# hang up
 
 
+
+	PHONEBOOK ON SIM
+
+AT+CPBW				# to write a phonebook entry to a SIM card
+					
+# AT+CPBW=<index>,<number>,<type>,<text>   
+# <index>: The memory location number (e.g., 1, 2).
+# <number>: The phone number string.
+# <type>: The type of number (e.g., 129 for international).
+# <text>: The contact name in text format.
+
+# Example:
+# AT+CPBW=1,"+1234567890",129,"John Doe"
+
+# Note that not all manufacturers implement the full AT+CPBW command set; some may require 
+# AT+CPBS to select the storage area (e.g., SIM vs. Phone memory) before writing.
+

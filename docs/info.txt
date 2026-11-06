@@ -5,3 +5,20 @@ max frequency	- 48MHz
 RC oscillator	- 24MHz
 SRAM			- 8KB
 FLASH			- 62KB 
+
+x0      zero    constant value 0
+x1      ra      return address
+x2      sp      stack pointer
+x3      gp      global pointer
+x4      tp      thread pointer
+x5      t0      temporary register
+x6      t1      temporary register
+x7      t2      temporary register
+x8      s0/fp   saved register/frame pointer
+x9      s1      saved register
+x10     a0      function argument/return value
+x11     a1      function argument/return value
+x12     a2      function argument
+x13     a3      function argument
+x14     a4      function argument
+x15     a5      function argument
